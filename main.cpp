@@ -6,15 +6,20 @@
 #include "mem.h"
 using namespace std;
 
-int main(int argc, char const *argv[])
+struct A
 {
-    cpu::instruction x;
-    x.val = 0;
-    for (int i = 0; i < 70000; i++)
-    {
-        cout << i << ' ' << (int32_t(int16_t(x.i.imm)) << 2) << endl;
-        x.i.imm++;
-    }
+    uint32_t lo : 16;
+    uint32_t hi : 16;
+};
 
+int main()
+{
+    A a{};
+    a.lo = 0xFFFF;
+    auto b = a.lo << 16;
+    cout << b << endl;
+    auto c = uint16_t(0xFF) >> 16;
+    auto d = uint8_t(0xFF) >> 1;
+    decltype(a.lo) t;
     return 0;
 }

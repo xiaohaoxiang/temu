@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "defs.h"
+#include <limits>
 
 void cpu::exec_typei(instruction instr)
 {
@@ -266,11 +267,10 @@ void cpu::exec_typej(instruction instr)
     }
 }
 
-#define instr_define(name) inline void cpu::exec_##name(instruction instr)
+#define instr_def(name) inline void cpu::exec_##name(instruction instr)
 
-instr_define(beq)
+instr_def(beq)
 {
-    regs.pc += 4U;
     if (regs.reg[instr.i.rs]._32 == regs.reg[instr.i.rt]._32)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -278,9 +278,8 @@ instr_define(beq)
     }
 }
 
-instr_define(bne)
+instr_def(bne)
 {
-    regs.pc += 4U;
     if (regs.reg[instr.i.rs]._32 != regs.reg[instr.i.rt]._32)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -288,9 +287,8 @@ instr_define(bne)
     }
 }
 
-instr_define(bltz)
+instr_def(bltz)
 {
-    regs.pc += 4U;
     if (uint32_t(regs.reg[instr.i.rs]._32) < 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -298,9 +296,8 @@ instr_define(bltz)
     }
 }
 
-instr_define(bgez)
+instr_def(bgez)
 {
-    regs.pc += 4U;
     if (uint32_t(regs.reg[instr.i.rs]._32) >= 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -308,10 +305,9 @@ instr_define(bgez)
     }
 }
 
-instr_define(bltzal)
+instr_def(bltzal)
 {
-    regs.reg[$ra]._32 = regs.pc + 8U;
-    regs.pc += 4U;
+    regs.reg[$ra]._32 = regs.pc + 4U;
     if (uint32_t(regs.reg[instr.i.rs]._32) < 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -319,10 +315,9 @@ instr_define(bltzal)
     }
 }
 
-instr_define(bgezal)
+instr_def(bgezal)
 {
-    regs.reg[$ra]._32 = regs.pc + 8U;
-    regs.pc += 4U;
+    regs.reg[$ra]._32 = regs.pc + 4U;
     if (uint32_t(regs.reg[instr.i.rs]._32) >= 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -330,9 +325,8 @@ instr_define(bgezal)
     }
 }
 
-instr_define(blez)
+instr_def(blez)
 {
-    regs.pc += 4U;
     if (uint32_t(regs.reg[instr.i.rs]._32) <= 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -340,9 +334,8 @@ instr_define(blez)
     }
 }
 
-instr_define(bgtz)
+instr_def(bgtz)
 {
-    regs.pc += 4U;
     if (uint32_t(regs.reg[instr.i.rs]._32) > 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
@@ -350,12 +343,141 @@ instr_define(bgtz)
     }
 }
 
-instr_define(addi)
+instr_def(addi)
 {
-    
+    int64_t sum = int64_t(regs.reg[instr.i.rs]._32) + signedext(instr.i.imm, 16, 64);
+    if (sum < std::numeric_limits<int32_t>::min() || std::numeric_limits<int32_t>::max() < sum)
+    {
+        // signal exception(integer overflow)
+    }
+    else
+    {
+        regs.reg[instr.i.rt]._32 = uint32_t(sum);
+    }
 }
 
-#undef instr_define
+instr_def(addiu)
+{
+    regs.reg[instr.i.rt]._32 = regs.reg[instr.i.rs]._32 + signedext(instr.i.imm, 16, 32);
+}
+
+instr_def(slti)
+{
+    regs.reg[instr.i.rt]._32 = int32_t(regs.reg[instr.i.rs]._32) < signedext(instr.i.imm, 16, 32);
+}
+
+instr_def(sltiu)
+{
+    regs.reg[instr.i.rt]._32 = regs.reg[instr.i.rs]._32 < uint32_t(signedext(instr.i.imm, 16, 32));
+}
+
+instr_def(andi)
+{
+    regs.reg[instr.i.rt]._32 = regs.reg[instr.i.rs]._32 & unsignedext(instr.i.imm, 16, 32);
+}
+
+instr_def(ori)
+{
+    regs.reg[instr.i.rt]._32 = regs.reg[instr.i.rs]._32 | unsignedext(instr.i.imm, 16, 32);
+}
+
+instr_def(xori)
+{
+    regs.reg[instr.i.rt]._32 = regs.reg[instr.i.rs]._32 ^ unsignedext(instr.i.imm, 16, 32);
+}
+
+instr_def(lui)
+{
+    regs.reg[instr.i.rt]._32 = uint32_t(instr.i.imm) << 16;
+}
+
+instr_def(lb)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    uint8_t membyte = uint8_t(mem.mem_read<1>(addr));
+    regs.reg[instr.i.rt]._32 = signedext(membyte, 8, 32);
+}
+
+instr_def(lh)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    if (addr & 1U)
+    {
+        // signal exception(address error)
+    }
+    else
+    {
+        uint16_t memhalfword = uint16_t(mem.mem_read<2>(addr));
+        regs.reg[instr.i.rt]._32 = signedext(memhalfword, 16, 32);
+    }
+}
+
+instr_def(lw)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    if (addr & 3U)
+    {
+        // signal exception(address error)
+    }
+    else
+    {
+        uint32_t memword = mem.mem_read<4>(addr);
+        regs.reg[instr.i.rt]._32 = memword;
+    }
+}
+
+instr_def(lbu)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    regs.reg[instr.i.rt]._32 = mem.mem_read<1>(addr);
+}
+
+instr_def(lhu)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    if (addr & 1U)
+    {
+        // signal exception(address error)
+    }
+    else
+    {
+        regs.reg[instr.i.rt]._32 = mem.mem_read<2>(addr);
+    }
+}
+
+instr_def(sb)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    mem.mem_write<1>(addr, unsignedext(regs.reg[instr.i.rt]._8, 8, 32));
+}
+
+instr_def(sh)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    if (addr & 1U)
+    {
+        // signal exception(address error)
+    }
+    else
+    {
+        mem.mem_write<2>(addr, unsignedext(regs.reg[instr.i.rt]._16, 16, 32));
+    }
+}
+
+instr_def(sw)
+{
+    uint32_t addr = uint32_t(signedext(instr.i.imm, 16, 32) + regs.reg[instr.i.rs]._32);
+    if (addr & 3U)
+    {
+        // signal exception(address error)
+    }
+    else
+    {
+        mem.mem_write<4>(addr, regs.reg[instr.i.rt]._32);
+    }
+}
+
+#undef instr_def
 
 cpu::cpu(ram &mem)
     : mem(mem)
@@ -385,6 +507,7 @@ const ram &cpu::get_mem() const
 void cpu::exec(instruction instr)
 {
     uint32_t op = instr.r.op;
+    regs.pc += 4U;
     if (op == 0b000000U || op == 0b010000U)
     { // r type
         exec_typer(instr);

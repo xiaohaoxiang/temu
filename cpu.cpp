@@ -1,5 +1,5 @@
-#include <cstring>
 #include "cpu.h"
+#include "defs.h"
 
 void cpu::exec_typei(instruction instr)
 {
@@ -270,8 +270,92 @@ void cpu::exec_typej(instruction instr)
 
 instr_define(beq)
 {
+    regs.pc += 4U;
+    if (regs.reg[instr.i.rs]._32 == regs.reg[instr.i.rt]._32)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(bne)
+{
+    regs.pc += 4U;
+    if (regs.reg[instr.i.rs]._32 != regs.reg[instr.i.rt]._32)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(bltz)
+{
+    regs.pc += 4U;
+    if (uint32_t(regs.reg[instr.i.rs]._32) < 0)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(bgez)
+{
+    regs.pc += 4U;
+    if (uint32_t(regs.reg[instr.i.rs]._32) >= 0)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(bltzal)
+{
+    regs.reg[$ra]._32 = regs.pc + 8U;
+    regs.pc += 4U;
+    if (uint32_t(regs.reg[instr.i.rs]._32) < 0)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(bgezal)
+{
+    regs.reg[$ra]._32 = regs.pc + 8U;
+    regs.pc += 4U;
+    if (uint32_t(regs.reg[instr.i.rs]._32) >= 0)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(blez)
+{
+    regs.pc += 4U;
+    if (uint32_t(regs.reg[instr.i.rs]._32) <= 0)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(bgtz)
+{
+    regs.pc += 4U;
+    if (uint32_t(regs.reg[instr.i.rs]._32) > 0)
+    {
+        const int32_t offset = signedext(instr.i.imm, 16, 32);
+        regs.pc += offset << 2;
+    }
+}
+
+instr_define(addi)
+{
     
 }
+
+#undef instr_define
 
 cpu::cpu(ram &mem)
     : mem(mem)

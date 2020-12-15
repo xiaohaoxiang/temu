@@ -42,12 +42,13 @@ enum : uint32_t
 
 struct regfile
 {
-    union
+    union singlereg
     {
         uint32_t _32;
         uint16_t _16;
         uint8_t _8;
-    } reg[32];
+    };
+    singlereg reg[32];
     uint32_t pc, hi, lo;
 };
 

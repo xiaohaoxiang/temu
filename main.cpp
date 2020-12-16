@@ -6,20 +6,10 @@
 #include "mem.h"
 using namespace std;
 
-struct A
-{
-    uint32_t lo : 16;
-    uint32_t hi : 16;
-};
-
 int main()
 {
-    A a{};
-    a.lo = 0xFFFF;
-    auto b = a.lo << 16;
-    cout << b << endl;
-    auto c = uint16_t(0xFF) >> 16;
-    auto d = uint8_t(0xFF) >> 1;
-    decltype(a.lo) t;
+    regfile::singlereg x;
+    x._32 = -1654963;
+    cout << (int32_t(x._32) >> 1) << endl;
     return 0;
 }

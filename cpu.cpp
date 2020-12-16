@@ -477,6 +477,168 @@ instr_def(sw)
     }
 }
 
+instr_def(sll)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rt]._32 << instr.r.sa;
+}
+
+instr_def(srl)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rt]._32 >> instr.r.sa;
+}
+
+instr_def(sra)
+{
+    regs.reg[instr.r.rd]._32 = int32_t(regs.reg[instr.r.rt]._32) >> instr.r.sa;
+}
+
+instr_def(sllv)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rt]._32 << (regs.reg[instr.r.rs]._32 & 0b11111U);
+}
+
+instr_def(srav)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rt]._32 >> (regs.reg[instr.r.rs]._32 & 0b11111U);
+}
+
+instr_def(jr)
+{
+    regs.pc = regs.reg[instr.r.rs]._32;
+}
+
+instr_def(jalr)
+{
+    regs.reg[instr.r.rd]._32 = regs.pc + 4U;
+    regs.pc = regs.reg[instr.r.rs]._32;
+}
+
+instr_def(syscall)
+{
+    // signal exception(system call)
+}
+
+instr_def(mfhi)
+{
+    regs.reg[instr.r.rd]._32 = regs.hi;
+}
+
+instr_def(mthi)
+{
+    regs.hi = regs.reg[instr.r.rs]._32;
+}
+
+instr_def(mflo)
+{
+    regs.reg[instr.r.rd]._32 = regs.lo;
+}
+
+instr_def(mtlo)
+{
+    regs.lo = regs.reg[instr.r.rs]._32;
+}
+
+instr_def(mult)
+{
+    int64_t prod = int64_t(regs.reg[instr.r.rs]._32) * int64_t(regs.reg[instr.r.rt]._32);
+    regs.lo = uint32_t(prod);
+    regs.hi = uint32_t(prod >> 32);
+}
+
+instr_def(multu)
+{
+    uint64_t prod = regs.reg[instr.r.rs]._32 * regs.reg[instr.r.rt]._32;
+    regs.lo = uint32_t(prod);
+    regs.hi = uint32_t(prod >> 32);
+}
+
+instr_def(div)
+{
+    int32_t a = int32_t(regs.reg[instr.r.rs]._32), b = int32_t(regs.reg[instr.r.rt]._32);
+    int32_t q = a / b, r = a % b;
+    regs.lo = uint32_t(q);
+    regs.hi = uint32_t(r);
+}
+
+instr_def(divu)
+{
+    uint32_t a = regs.reg[instr.r.rs]._32, b = regs.reg[instr.r.rt]._32;
+    uint32_t q = a / b, r = a % b;
+    regs.lo = q;
+    regs.hi = r;
+}
+
+instr_def(add)
+{
+    int64_t sum = int64_t(regs.reg[instr.r.rs]._32) + int64_t(regs.reg[instr.r.rt]._32);
+    if (sum < std::numeric_limits<int32_t>::min() || std::numeric_limits<int32_t>::max() < sum)
+    {
+        // signal exception(integer overflow)
+    }
+    else
+    {
+        regs.reg[instr.r.rd]._32 = uint32_t(sum);
+    }
+}
+
+instr_def(addu)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rs]._32 + regs.reg[instr.r.rt]._32;
+}
+
+instr_def(sub)
+{
+    int64_t diff = int64_t(regs.reg[instr.r.rs]._32) - int64_t(regs.reg[instr.r.rt]._32);
+    if (diff < std::numeric_limits<int32_t>::min() || std::numeric_limits<int32_t>::max() < diff)
+    {
+        // signal exception(integer overflow)
+    }
+    else
+    {
+        regs.reg[instr.r.rd]._32 = uint32_t(diff);
+    }
+}
+
+instr_def(subu)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rs]._32 - regs.reg[instr.r.rt]._32;
+}
+
+instr_def(and)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rs]._32 & regs.reg[instr.r.rt]._32;
+}
+
+instr_def(or)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rs]._32 | regs.reg[instr.r.rt]._32;
+}
+
+instr_def(xor)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rs]._32 ^ regs.reg[instr.r.rt]._32;
+}
+
+instr_def(nor)
+{
+    regs.reg[instr.r.rd]._32 = ~(regs.reg[instr.r.rs]._32 | regs.reg[instr.r.rt]._32);
+}
+
+instr_def(slt)
+{
+    regs.reg[instr.r.rd]._32 = int32_t(regs.reg[instr.r.rs]._32) < int32_t(regs.reg[instr.r.rt]._32);
+}
+
+instr_def(sltu)
+{
+    regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rs]._32 < regs.reg[instr.r.rt]._32;
+}
+
+instr_def(mfc0)
+{
+    
+}
+
 #undef instr_def
 
 cpu::cpu(ram &mem)

@@ -47,9 +47,28 @@ struct regfile
         uint32_t _32;
         uint16_t _16;
         uint8_t _8;
-    };
-    singlereg reg[32];
+    } reg[32];
     uint32_t pc, hi, lo;
+
+    uint32_t badvaddr;
+    struct
+    {
+        bool ie : 1;
+        bool exl : 1;
+        int : 6;
+        uint32_t im : 8;
+        int : 16;
+    } status;
+    struct
+    {
+        int : 2;
+        uint32_t exccode : 5;
+        int : 1;
+        uint32_t ip : 8;
+        int : 15;
+        bool bd : 1;
+    } cause;
+    uint32_t epc;
 };
 
 class cpu

@@ -1,6 +1,7 @@
+#include <cstring>
+#include <limits>
 #include "cpu.h"
 #include "defs.h"
-#include <limits>
 
 void cpu::exec_typei(instruction instr)
 {
@@ -639,11 +640,20 @@ instr_def(mfc0)
     
 }
 
+instr_def(mtc0)
+{
+}
+
+instr_def(eret)
+{
+}
+
 #undef instr_def
 
 cpu::cpu(ram &mem)
     : mem(mem)
 {
+    std::memset(&regs, 0, sizeof(regs));
 }
 
 regfile &cpu::get_regs()

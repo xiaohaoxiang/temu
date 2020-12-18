@@ -498,9 +498,14 @@ instr_def(sllv)
     regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rt]._32 << (regs.reg[instr.r.rs]._32 & 0b11111U);
 }
 
-instr_def(srav)
+instr_def(srlv)
 {
     regs.reg[instr.r.rd]._32 = regs.reg[instr.r.rt]._32 >> (regs.reg[instr.r.rs]._32 & 0b11111U);
+}
+
+instr_def(srav)
+{
+    regs.reg[instr.r.rd]._32 = int32_t(regs.reg[instr.r.rt]._32) >> (regs.reg[instr.r.rs]._32 & 0b11111U);
 }
 
 instr_def(jr)
@@ -556,17 +561,33 @@ instr_def(multu)
 instr_def(div)
 {
     int32_t a = int32_t(regs.reg[instr.r.rs]._32), b = int32_t(regs.reg[instr.r.rt]._32);
-    int32_t q = a / b, r = a % b;
-    regs.lo = uint32_t(q);
-    regs.hi = uint32_t(r);
+    if (b == 0)
+    {
+        regs.lo = 0U;
+        regs.hi = 0U;
+    }
+    else
+    {
+        int32_t q = a / b, r = a % b;
+        regs.lo = uint32_t(q);
+        regs.hi = uint32_t(r);
+    }
 }
 
 instr_def(divu)
 {
     uint32_t a = regs.reg[instr.r.rs]._32, b = regs.reg[instr.r.rt]._32;
-    uint32_t q = a / b, r = a % b;
-    regs.lo = q;
-    regs.hi = r;
+    if (b == 0)
+    {
+        regs.lo = 0U;
+        regs.hi = 0U;
+    }
+    else
+    {
+        uint32_t q = a / b, r = a % b;
+        regs.lo = q;
+        regs.hi = r;
+    }
 }
 
 instr_def(add)
@@ -637,21 +658,120 @@ instr_def(sltu)
 
 instr_def(mfc0)
 {
-    
+    uint32_t val;
+    switch (instr.r.rd)
+    {
+    case $badvaddr:
+    {
+        val = regs.badvaddr;
+        break;
+    }
+    case $status:
+    {
+        val = regs.status.val;
+        break;
+    }
+    case $cause:
+    {
+        val = regs.cause.val;
+        break;
+    }
+    case $epc:
+    {
+        val = regs.epc;
+        break;
+    }
+    default:
+    {
+        val = 0;
+        break;
+    }
+    }
+    regs.reg[instr.r.rt]._32 = val;
 }
 
 instr_def(mtc0)
 {
+    static uint32_t nulldst;
+    uint32_t &ref = [&]() -> uint32_t & {
+        switch (instr.r.rd)
+        {
+        case $badvaddr:
+        {
+            return regs.badvaddr;
+        }
+        case $status:
+        {
+            return regs.status.val;
+        }
+        case $cause:
+        {
+            return regs.cause.val;
+        }
+        case $epc:
+        {
+            return regs.epc;
+        }
+        default:
+        {
+            return nulldst;
+        }
+        }
+    }();
+    ref = regs.reg[instr.r.rt]._32;
 }
 
 instr_def(eret)
 {
+    regs.pc = regs.epc;
+    regs.status.field.exl = false;
+}
+
+instr_def(j)
+{
+    regs.pc = (regs.pc & 0xF0000000) | (instr.j.addr << 2);
+}
+
+instr_def(jal)
+{
+    regs.reg[$ra]._32 = regs.pc + 4U;
+    regs.pc = (regs.pc & 0xF0000000) | (instr.j.addr << 2);
 }
 
 #undef instr_def
 
-cpu::cpu(ram &mem)
-    : mem(mem)
+void cpu::exception(uint32_t exccode)
+{
+    if (regs.status.field.exl)
+    {
+        if (exccode == exc_int)
+        {
+            return;
+        }
+    }
+    else
+    {
+    }
+    if (!regs.status.field.exl)
+    {
+    }
+    else if (exccode == exc_int)
+    {
+        return;
+    }
+}
+
+void cpu::jump(uint32_t target)
+{
+    if(delayed_branches)
+    {
+        in_delay_slot=true;
+        
+    }
+}
+
+cpu::cpu(ram &mem, bool delayed_branches)
+    : mem(mem), in_delay_slot(false), delayed_branches(delayed_branches)
 {
     std::memset(&regs, 0, sizeof(regs));
 }

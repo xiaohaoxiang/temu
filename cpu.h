@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include <cstdint>
+#include <functional>
 #include "mem.h"
 
 enum : uint32_t
@@ -40,6 +41,58 @@ enum : uint32_t
     $ra
 };
 
+enum : uint32_t
+{
+    $index,
+    $random,
+    $entrylo0,
+    $entrylo1,
+    $context,
+    $pagemask,
+    $wired,
+    $reserved0,
+    $badvaddr,
+    $count,
+    $entryhi,
+    $compare,
+    $status,
+    $cause,
+    $epc,
+    $prid,
+    $config,
+    $lladdr,
+    $watchlo,
+    $watchhi,
+    $reserved1,
+    $reserved2,
+    $reserved3,
+    $debug,
+    $depc,
+    $reserved4,
+    $errctl,
+    $reserved5,
+    $tagdatalo,
+    $reserved6,
+    $errorepc,
+    $desave
+};
+
+enum : uint32_t
+{
+    exc_int = 0x00,
+    exc_adel = 0x04,
+    exc_ades = 0x05,
+    exc_sys = 0x08,
+    exc_ri = 0x0A,
+    exc_ov = 0x0C
+};
+
+enum : uint32_t
+{
+    intaddr = 0x040,
+    excaddr = 0x100
+};
+
 struct regfile
 {
     union singlereg
@@ -47,26 +100,36 @@ struct regfile
         uint32_t _32;
         uint16_t _16;
         uint8_t _8;
-    } reg[32];
+    };
+    singlereg reg[32];
     uint32_t pc, hi, lo;
 
     uint32_t badvaddr;
-    struct
+    union
     {
-        bool ie : 1;
-        bool exl : 1;
-        int : 6;
-        uint32_t im : 8;
-        int : 16;
+        struct
+        {
+            bool ie : 1;
+            bool exl : 1;
+            int : 6;
+            uint32_t im : 8;
+            int : 16;
+
+        } field;
+        uint32_t val;
     } status;
-    struct
+    union
     {
-        int : 2;
-        uint32_t exccode : 5;
-        int : 1;
-        uint32_t ip : 8;
-        int : 15;
-        bool bd : 1;
+        struct
+        {
+            int : 2;
+            uint32_t exccode : 5;
+            int : 1;
+            uint32_t ip : 8;
+            int : 15;
+            bool bd : 1;
+        } field;
+        uint32_t val;
     } cause;
     uint32_t epc;
 };
@@ -174,8 +237,11 @@ private:
 
 #undef instr_decl
 
+    void exception(uint32_t exccode);
+    void jump(uint32_t target);
+
 public:
-    cpu(ram &mem);
+    cpu(ram &mem, bool delayed_branches = true);
     regfile &get_regs();
     const regfile &get_regs() const;
     ram &get_mem();
@@ -186,6 +252,10 @@ public:
 private:
     regfile regs;
     ram &mem;
+    bool in_delay_slot;
+
+public:
+    const bool delayed_branches;
 };
 
 #endif // !CPU_H

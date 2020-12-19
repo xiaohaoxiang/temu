@@ -253,6 +253,7 @@ private:
     regfile regs;
     ram &mem;
     bool in_delay_slot;
+    bool exception_occurred;
 
 public:
     const bool delayed_branches;

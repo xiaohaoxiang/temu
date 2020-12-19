@@ -3,6 +3,40 @@
 #include "cpu.h"
 #include "defs.h"
 
+const char *const regname[] = {
+    "$zero",
+    "$at",
+    "$v0",
+    "$v1",
+    "$a0",
+    "$a1",
+    "$a2",
+    "$a3",
+    "$t0",
+    "$t1",
+    "$t2",
+    "$t3",
+    "$t4",
+    "$t5",
+    "$t6",
+    "$t7",
+    "$s0",
+    "$s1",
+    "$s2",
+    "$s3",
+    "$s4",
+    "$s5",
+    "$s6",
+    "$s7",
+    "$t8",
+    "$t9",
+    "$k0",
+    "$k1",
+    "$gp",
+    "$sp",
+    "$fp",
+    "$ra"};
+
 void cpu::exec_typei(instruction instr)
 {
     auto cur = instr.i;
@@ -10,10 +44,12 @@ void cpu::exec_typei(instruction instr)
     {
     case 0b000100U:
     { // beq
+        exec_beq(instr);
         break;
     }
     case 0b000101U:
     { // bne
+        exec_bne(instr);
         break;
     }
     case 0b000001U:
@@ -22,18 +58,22 @@ void cpu::exec_typei(instruction instr)
         {
         case 0b00000U:
         { // bltz
+            exec_bltz(instr);
             break;
         }
         case 0b00001U:
         { // bgez
+            exec_bgez(instr);
             break;
         }
         case 0b10000U:
         { // bltzal
+            exec_bltzal(instr);
             break;
         }
         case 0b10001U:
         { // bgezal
+            exec_bgezal(instr);
             break;
         }
         }
@@ -41,74 +81,92 @@ void cpu::exec_typei(instruction instr)
     }
     case 0b000110U:
     { // blez
+        exec_blez(instr);
         break;
     }
     case 0b000111U:
     { // bgtz
+        exec_bgtz(instr);
         break;
     }
     case 0b001000U:
     { // addi
+        exec_addi(instr);
         break;
     }
     case 0b001001U:
     { // addiu
+        exec_addiu(instr);
         break;
     }
     case 0b001010U:
     { // slti
+        exec_slti(instr);
         break;
     }
     case 0b001011U:
     { // sltiu
+        exec_sltiu(instr);
         break;
     }
     case 0b001100U:
     { // andi
+        exec_andi(instr);
         break;
     }
     case 0b001101U:
     { // ori
+        exec_ori(instr);
         break;
     }
     case 0b001110U:
     { // xori
+        exec_xori(instr);
         break;
     }
     case 0b001111U:
     { // lui
+        exec_lui(instr);
         break;
     }
     case 0b100000U:
     { // lb
+        exec_lb(instr);
         break;
     }
     case 0b100001U:
     { // lh
+        exec_lh(instr);
         break;
     }
     case 0b100011U:
     { // lw
+        exec_lw(instr);
         break;
     }
     case 0b100100U:
     { // lbu
+        exec_lbu(instr);
         break;
     }
     case 0b100101U:
     { // lhu
+        exec_lhu(instr);
         break;
     }
     case 0b101000U:
     { // sb
+        exec_sb(instr);
         break;
     }
     case 0b101001U:
     { // sh
+        exec_sh(instr);
         break;
     }
     case 0b101011U:
     { // sw
+        exec_sw(instr);
         break;
     }
     }
@@ -123,110 +181,137 @@ void cpu::exec_typer(instruction instr)
         {
         case 0b000000U:
         { // sll
+            exec_sll(instr);
             break;
         }
         case 0b000010U:
         { // srl
+            exec_srl(instr);
             break;
         }
         case 0b000011U:
         { // sra
+            exec_sra(instr);
             break;
         }
         case 0b000100U:
         { // sllv
+            exec_sllv(instr);
             break;
         }
         case 0b000110U:
         { // srlv
+            exec_srlv(instr);
             break;
         }
         case 0b000111U:
         { // srav
+            exec_srav(instr);
             break;
         }
         case 0b001000U:
         { // jr
+            exec_jr(instr);
             break;
         }
         case 0b001001U:
         { // jalr
+            exec_jalr(instr);
             break;
         }
         case 0b001100U:
         { // syscall
+            exec_syscall(instr);
             break;
         }
         case 0b010000U:
         { // mfhi
+            exec_mfhi(instr);
             break;
         }
         case 0b010001U:
         { // mthi
+            exec_mthi(instr);
             break;
         }
         case 0b010010U:
         { // mflo
+            exec_mflo(instr);
             break;
         }
         case 0b010011U:
         { // mtlo
+            exec_mtlo(instr);
             break;
         }
         case 0b011000U:
         { // mult
+            exec_mult(instr);
             break;
         }
         case 0b011001U:
         { // multu
+            exec_multu(instr);
             break;
         }
         case 0b011010U:
         { // div
+            exec_div(instr);
             break;
         }
         case 0b011011U:
         { // divu
+            exec_divu(instr);
             break;
         }
         case 0b100000U:
         { // add
+            exec_add(instr);
             break;
         }
         case 0b100001U:
         { // addu
+            exec_addu(instr);
             break;
         }
         case 0b100010U:
         { // sub
+            exec_sub(instr);
             break;
         }
         case 0b100011U:
         { // subu
+            exec_subu(instr);
             break;
         }
         case 0b100100U:
         { // and
+            exec_and(instr);
             break;
         }
         case 0b100101U:
         { // or
+            exec_or(instr);
             break;
         }
         case 0b100110U:
         { // xor
+            exec_xor(instr);
             break;
         }
         case 0b100111U:
         { // nor
+            exec_nor(instr);
             break;
         }
         case 0b101010U:
         { // slt
+            exec_slt(instr);
             break;
         }
         case 0b101011U:
         { // sltu
+            exec_sltu(instr);
             break;
         }
         }
@@ -237,14 +322,17 @@ void cpu::exec_typer(instruction instr)
         {
         case 0b00000U:
         { // mfc0
+            exec_mfc0(instr);
             break;
         }
         case 0b00100U:
         { // mtc0
+            exec_mtc0(instr);
             break;
         }
         case 0b10000U:
         { // eret
+            exec_eret(instr);
             break;
         }
         }
@@ -258,11 +346,12 @@ void cpu::exec_typej(instruction instr)
     {
     case 0b000010U:
     { // j
-        regs.pc = ((regs.pc + 4U) & 0xF0000000) | (cur.addr << 2);
+        exec_j(instr);
         break;
     }
     case 0b000011U:
     { // jal
+        exec_jal(instr);
         break;
     }
     }
@@ -275,7 +364,7 @@ instr_def(beq)
     if (regs.reg[instr.i.rs]._32 == regs.reg[instr.i.rt]._32)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -284,7 +373,7 @@ instr_def(bne)
     if (regs.reg[instr.i.rs]._32 != regs.reg[instr.i.rt]._32)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -293,7 +382,7 @@ instr_def(bltz)
     if (uint32_t(regs.reg[instr.i.rs]._32) < 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -302,7 +391,7 @@ instr_def(bgez)
     if (uint32_t(regs.reg[instr.i.rs]._32) >= 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -312,7 +401,7 @@ instr_def(bltzal)
     if (uint32_t(regs.reg[instr.i.rs]._32) < 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -322,7 +411,7 @@ instr_def(bgezal)
     if (uint32_t(regs.reg[instr.i.rs]._32) >= 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -331,7 +420,7 @@ instr_def(blez)
     if (uint32_t(regs.reg[instr.i.rs]._32) <= 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -340,7 +429,7 @@ instr_def(bgtz)
     if (uint32_t(regs.reg[instr.i.rs]._32) > 0)
     {
         const int32_t offset = signedext(instr.i.imm, 16, 32);
-        regs.pc += offset << 2;
+        jump(regs.pc + (offset << 2));
     }
 }
 
@@ -350,6 +439,7 @@ instr_def(addi)
     if (sum < std::numeric_limits<int32_t>::min() || std::numeric_limits<int32_t>::max() < sum)
     {
         // signal exception(integer overflow)
+        exception(exc_ov);
     }
     else
     {
@@ -405,6 +495,7 @@ instr_def(lh)
     if (addr & 1U)
     {
         // signal exception(address error)
+        exception(exc_adel);
     }
     else
     {
@@ -419,6 +510,7 @@ instr_def(lw)
     if (addr & 3U)
     {
         // signal exception(address error)
+        exception(exc_adel);
     }
     else
     {
@@ -439,6 +531,7 @@ instr_def(lhu)
     if (addr & 1U)
     {
         // signal exception(address error)
+        exception(exc_adel);
     }
     else
     {
@@ -458,6 +551,7 @@ instr_def(sh)
     if (addr & 1U)
     {
         // signal exception(address error)
+        exception(exc_ades);
     }
     else
     {
@@ -471,6 +565,7 @@ instr_def(sw)
     if (addr & 3U)
     {
         // signal exception(address error)
+        exception(exc_ades);
     }
     else
     {
@@ -510,18 +605,19 @@ instr_def(srav)
 
 instr_def(jr)
 {
-    regs.pc = regs.reg[instr.r.rs]._32;
+    jump(regs.reg[instr.r.rs]._32);
 }
 
 instr_def(jalr)
 {
     regs.reg[instr.r.rd]._32 = regs.pc + 4U;
-    regs.pc = regs.reg[instr.r.rs]._32;
+    jump(regs.reg[instr.r.rs]._32);
 }
 
 instr_def(syscall)
 {
     // signal exception(system call)
+    exception(exc_sys);
 }
 
 instr_def(mfhi)
@@ -596,6 +692,7 @@ instr_def(add)
     if (sum < std::numeric_limits<int32_t>::min() || std::numeric_limits<int32_t>::max() < sum)
     {
         // signal exception(integer overflow)
+        exception(exc_ov);
     }
     else
     {
@@ -614,6 +711,7 @@ instr_def(sub)
     if (diff < std::numeric_limits<int32_t>::min() || std::numeric_limits<int32_t>::max() < diff)
     {
         // signal exception(integer overflow)
+        exception(exc_ov);
     }
     else
     {
@@ -723,55 +821,76 @@ instr_def(mtc0)
 
 instr_def(eret)
 {
-    regs.pc = regs.epc;
     regs.status.field.exl = false;
+    jump(regs.epc);
 }
 
 instr_def(j)
 {
-    regs.pc = (regs.pc & 0xF0000000) | (instr.j.addr << 2);
+    jump((regs.pc & 0xF0000000) | (instr.j.addr << 2));
 }
 
 instr_def(jal)
 {
     regs.reg[$ra]._32 = regs.pc + 4U;
-    regs.pc = (regs.pc & 0xF0000000) | (instr.j.addr << 2);
+    jump((regs.pc & 0xF0000000) | (instr.j.addr << 2));
 }
 
 #undef instr_def
 
 void cpu::exception(uint32_t exccode)
 {
-    if (regs.status.field.exl)
-    {
-        if (exccode == exc_int)
-        {
-            return;
-        }
-    }
-    else
-    {
-    }
     if (!regs.status.field.exl)
     {
+        regs.status.field.exl = true;
+        if (in_delay_slot)
+        {
+            regs.epc = regs.pc - 8U;
+            regs.cause.field.bd = true;
+        }
+        else
+        {
+            regs.epc = regs.pc - 4U;
+            regs.cause.field.bd = false;
+        }
     }
     else if (exccode == exc_int)
     {
         return;
     }
+    exception_occurred = true;
+    regs.cause.field.exccode = exccode;
+    regs.badvaddr = regs.pc - 4U;
+    if (exccode == exc_int)
+    {
+        regs.pc = intaddr;
+    }
+    else
+    {
+        regs.pc = excaddr;
+    }
 }
 
 void cpu::jump(uint32_t target)
 {
-    if(delayed_branches)
+    if (delayed_branches)
     {
-        in_delay_slot=true;
-        
+        in_delay_slot = true;
+        exec(mem.mem_read<4>(regs.pc));
+        in_delay_slot = false;
+        if (!exception_occurred)
+        {
+            regs.pc = target;
+        }
+    }
+    else
+    {
+        regs.pc = target;
     }
 }
 
 cpu::cpu(ram &mem, bool delayed_branches)
-    : mem(mem), in_delay_slot(false), delayed_branches(delayed_branches)
+    : mem(mem), in_delay_slot(false), exception_occurred(false), delayed_branches(delayed_branches)
 {
     std::memset(&regs, 0, sizeof(regs));
 }

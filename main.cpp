@@ -6,21 +6,21 @@
 #include "mem.h"
 using namespace std;
 
-struct A
+struct cfree
 {
-    int : 2;
-    uint32_t exccode : 5;
-    int : 1;
-    uint32_t ip : 8;
-    int : 15;
-    bool bd : 1;
+    template <typename T>
+    void operator()(T p)
+    {
+        return free((void *)(p));
+    }
 };
 
 int main()
 {
-    A x;
-    cout << sizeof(regfile)<< endl;
-    cpu::instruction y;
-    sizeof(y);
+    for (;;)
+    {
+        unique_ptr<char[], cfree> p(readline("temu$ "));
+        cout << p.get() << endl;
+    }
     return 0;
 }

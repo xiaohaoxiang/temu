@@ -3,12 +3,14 @@
 
 #include <string>
 #include <variant>
-#include <vector>
+#include <list>
 #include "processor.h"
 
 enum unary_op
 {
     op_deref, // *
+    op_posit, // +
+    op_negat, // -
     op_lnot,  // !
     op_flip   // ~
 };
@@ -20,14 +22,14 @@ enum binocular_op
     op_mult,              // *
     op_div,               // /
     op_mod,               // %
+    op_band,              // &
+    op_bor,               // |
     op_sl,                // <<
     op_sr,                // >>
     op_eq,                // ==
     op_neq,               // !=
     op_land,              // &&
-    op_lor,               // ||
-    op_band,              // &
-    op_bor                // |
+    op_lor                // ||
 };
 
 class watch;
@@ -66,11 +68,20 @@ class watch
 public:
     using value_type = express::value_type;
 
+private:
+    using valtype_constant = express::valtype_constant;
+    using valtype_regref = express::valtype_regref;
+    using valtype_unary = express::valtype_unary;
+    using valtype_binocular = express::valtype_binocular;
+    using element_type = express::element_type;
+
+public:
     watch(const std::string &exprstr);
     value_type get_value(const regfile &regs, const ram &mem) const;
+    bool valid();
 
 private:
-    std::vector<express> buffer;
+    std::list<express> elst;
 };
 
 #endif // !EXPRESS_H

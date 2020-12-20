@@ -8,15 +8,10 @@
 #include <vector>
 using namespace std;
 
-struct A
-{
-    int &x;
-    A(int &x) : x(x) {}
-};
+
 
 int main()
 {
-    
 
     return 0;
 }

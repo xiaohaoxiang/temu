@@ -1,26 +1,22 @@
 #include <iostream>
 #include <memory>
-#include <readline/history.h>
-#include <readline/readline.h>
-#include "cpu.h"
+#include "processor.h"
 #include "mem.h"
+#include "express.h"
+#include <string>
+#include <any>
+#include <vector>
 using namespace std;
 
-struct cfree
+struct A
 {
-    template <typename T>
-    void operator()(T p)
-    {
-        return free((void *)(p));
-    }
+    int &x;
+    A(int &x) : x(x) {}
 };
 
 int main()
 {
-    for (;;)
-    {
-        unique_ptr<char[], cfree> p(readline("temu$ "));
-        cout << p.get() << endl;
-    }
+    
+
     return 0;
 }

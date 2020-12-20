@@ -1,11 +1,12 @@
-#ifndef CPU_H
-#define CPU_H
+#ifndef PROCESSOR_H
+#define PROCESSOR_H
 
 #include <cstdint>
-#include <functional>
 #include "mem.h"
 
-enum : uint32_t
+extern const char *const regname[];
+
+enum regenum : uint32_t
 {
     $zero,
     $at,
@@ -41,7 +42,7 @@ enum : uint32_t
     $ra
 };
 
-enum : uint32_t
+enum cp0regnum : uint32_t
 {
     $index,
     $random,
@@ -134,7 +135,7 @@ struct regfile
     uint32_t epc;
 };
 
-class cpu
+class processor
 {
 public:
     union instruction
@@ -241,7 +242,7 @@ private:
     void jump(uint32_t target);
 
 public:
-    cpu(ram &mem, bool delayed_branches = true);
+    processor(ram &mem, bool delayed_branches = true);
     regfile &get_regs();
     const regfile &get_regs() const;
     ram &get_mem();
@@ -259,4 +260,4 @@ public:
     const bool delayed_branches;
 };
 
-#endif // !CPU_H
+#endif // !PROCESSOR_H

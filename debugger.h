@@ -3,7 +3,7 @@
 
 class debugger
 {
-
+    
 };
 
 #endif // !DEBUGGER_H

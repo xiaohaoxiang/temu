@@ -1,6 +1,6 @@
 #include <cstring>
 #include <limits>
-#include "cpu.h"
+#include "processor.h"
 #include "defs.h"
 
 const char *const regname[] = {
@@ -37,7 +37,7 @@ const char *const regname[] = {
     "$fp",
     "$ra"};
 
-void cpu::exec_typei(instruction instr)
+void processor::exec_typei(instruction instr)
 {
     auto cur = instr.i;
     switch (cur.op)
@@ -172,7 +172,7 @@ void cpu::exec_typei(instruction instr)
     }
 }
 
-void cpu::exec_typer(instruction instr)
+void processor::exec_typer(instruction instr)
 {
     auto cur = instr.r;
     if (cur.op == 0)
@@ -339,7 +339,7 @@ void cpu::exec_typer(instruction instr)
     }
 }
 
-void cpu::exec_typej(instruction instr)
+void processor::exec_typej(instruction instr)
 {
     auto cur = instr.j;
     switch (cur.op)
@@ -357,7 +357,7 @@ void cpu::exec_typej(instruction instr)
     }
 }
 
-#define instr_def(name) inline void cpu::exec_##name(instruction instr)
+#define instr_def(name) inline void processor::exec_##name(instruction instr)
 
 instr_def(beq)
 {
@@ -838,7 +838,7 @@ instr_def(jal)
 
 #undef instr_def
 
-void cpu::exception(uint32_t exccode)
+void processor::exception(uint32_t exccode)
 {
     if (!regs.status.field.exl)
     {
@@ -871,7 +871,7 @@ void cpu::exception(uint32_t exccode)
     }
 }
 
-void cpu::jump(uint32_t target)
+void processor::jump(uint32_t target)
 {
     if (delayed_branches)
     {
@@ -889,33 +889,33 @@ void cpu::jump(uint32_t target)
     }
 }
 
-cpu::cpu(ram &mem, bool delayed_branches)
+processor::processor(ram &mem, bool delayed_branches)
     : mem(mem), in_delay_slot(false), exception_occurred(false), delayed_branches(delayed_branches)
 {
     std::memset(&regs, 0, sizeof(regs));
 }
 
-regfile &cpu::get_regs()
+regfile &processor::get_regs()
 {
     return regs;
 }
 
-const regfile &cpu::get_regs() const
+const regfile &processor::get_regs() const
 {
     return regs;
 }
 
-ram &cpu::get_mem()
+ram &processor::get_mem()
 {
     return mem;
 }
 
-const ram &cpu::get_mem() const
+const ram &processor::get_mem() const
 {
     return mem;
 }
 
-void cpu::exec(instruction instr)
+void processor::exec(instruction instr)
 {
     uint32_t op = instr.r.op;
     regs.pc += 4U;

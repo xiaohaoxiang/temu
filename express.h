@@ -22,10 +22,15 @@ enum binocular_op
     op_mult,              // *
     op_div,               // /
     op_mod,               // %
+    op_xor,               // ^
     op_band,              // &
     op_bor,               // |
     op_sl,                // <<
+    op_le,                // <=
+    op_lt,                // <
     op_sr,                // >>
+    op_ge,                // >=
+    op_gt,                // >
     op_eq,                // ==
     op_neq,               // !=
     op_land,              // &&
@@ -81,7 +86,7 @@ public:
     bool valid();
 
 private:
-    std::list<express> elst;
+    std::list<express> buffer;
 };
 
 #endif // !EXPRESS_H

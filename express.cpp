@@ -9,6 +9,7 @@
 #include <regex>
 #include <string>
 #include <tuple>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 #include "express.h"
@@ -90,8 +91,8 @@ watch::watch(const std::string &exprstr)
     for (std::size_t i = 0; s[i];)
     {
         static const std::function<void()> parse = [&]() {
-            static const std::function<void(int)> insert = [&](int op) {
-                auto it = elst.insert(elst.end(), element_type{});
+            static const auto insert = [&](auto op) {
+                auto it = elst.insert(elst.end(), element_type(op));
                 ++i;
                 parse();
                 auto nit = std::next(it);
@@ -99,7 +100,7 @@ watch::watch(const std::string &exprstr)
                 opvec.push_back(std::make_tuple(bcnt, opprior[op], i, it));
             };
 
-            static const std::function<void(unary_op, binocular_op)> judged_insert = [&](unary_op op_unary, binocular_op op_binocular) {
+            static const auto judged_insert = [&](unary_op op_unary, binocular_op op_binocular) {
                 if (elst.empty() || std::holds_alternative<valtype_unary>(elst.back().val) || std::holds_alternative<valtype_binocular>(elst.back().val))
                 {
                     insert(op_unary);
@@ -110,11 +111,11 @@ watch::watch(const std::string &exprstr)
                 }
             };
 
-            static const std::function<void(binocular_op, binocular_op, char)> judged_insert2 = [&](binocular_op op1, binocular_op op2, char ch2) {
+            static const auto judged_insert2 = [&](binocular_op op1, binocular_op op2, char ch2) {
                 return insert(s[++i] == ch2 ? op2 : op1);
             };
 
-            static const std::function<bool(const char)> is_idchar = [](const char ch) {
+            static const auto is_idchar = [](const char ch) {
                 return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
             };
 
@@ -295,7 +296,28 @@ watch::watch(const std::string &exprstr)
 
     for (const auto &tp : opvec)
     {
-        auto &cur = std::get<3>(tp);
-        
+        auto &curit = std::get<std::list<express>::iterator>(tp);
+        std::visit([&](auto &arg) {
+            using argtype = std::decay_t<decltype(arg)>;
+            if constexpr (std::is_same_v<argtype, valtype_unary>)
+            {
+                auto nit = std::next(curit);
+                std::get<valtype_unary>(curit->val).son = nit;
+                buffer.splice(buffer.end(), elst, nit);
+            }
+            else if constexpr (std::is_same_v<argtype, valtype_binocular>)
+            {
+                auto [lit, rit] = std::make_pair(std::prev(curit), std::next(curit));
+                auto &cur = std::get<valtype_binocular>(curit->val);
+                std::tie(cur.left, cur.right) = std::tie(lit, rit);
+                buffer.splice(buffer.end(), elst, lit);
+                buffer.splice(buffer.end(), elst, rit);
+            }
+            else
+            {
+                // never reach
+            }
+        },
+                   curit->val);
     }
 }

@@ -49,16 +49,17 @@ private:
     using valtype_regref = regenum;
     struct valtype_unary
     {
-        const express &son;
+        std::list<express>::const_iterator son;
         unary_op op;
-        valtype_unary(const express &son, unary_op op) : son(son), op(op) {}
+        valtype_unary(unary_op op, std::list<express>::const_iterator son = std::list<express>::const_iterator{nullptr}) : son(son), op(op) {}
     };
     struct valtype_binocular
     {
-        const express &left;
-        const express &right;
+        std::list<express>::const_iterator left;
+        std::list<express>::const_iterator right;
         binocular_op op;
-        valtype_binocular(const express &left, const express &right, binocular_op op) : left(left), right(right), op(op) {}
+        valtype_binocular(binocular_op op, std::list<express>::const_iterator left = std::list<express>::const_iterator{nullptr},
+                          std::list<express>::const_iterator right = std::list<express>::const_iterator{nullptr}) : left(left), right(right), op(op) {}
     };
     using element_type = std::variant<valtype_constant, valtype_regref, valtype_unary, valtype_binocular>;
 

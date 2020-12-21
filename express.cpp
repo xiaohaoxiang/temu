@@ -1,3 +1,4 @@
+#include "express.h"
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -12,21 +13,20 @@
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
-#include "express.h"
 
-#define check_expr(test) \
-    do                   \
-    {                    \
-        if (test)        \
-        {                \
-            return;      \
-        }                \
+#define check_expr(test)                                                                                               \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (test)                                                                                                      \
+        {                                                                                                              \
+            return;                                                                                                    \
+        }                                                                                                              \
     } while (0)
 
-#define set_priority(op, pr) \
-    do                       \
-    {                        \
-        r[op] = (pr);        \
+#define set_priority(op, pr)                                                                                           \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        r[op] = (pr);                                                                                                  \
     } while (0)
 
 static const std::array<int32_t, op_lor + 1> opprior = []() {
@@ -101,7 +101,8 @@ watch::watch(const std::string &exprstr)
             };
 
             static const auto judged_insert = [&](unary_op op_unary, binocular_op op_binocular) {
-                if (elst.empty() || std::holds_alternative<valtype_unary>(elst.back().val) || std::holds_alternative<valtype_binocular>(elst.back().val))
+                if (elst.empty() || std::holds_alternative<valtype_unary>(elst.back().val) ||
+                    std::holds_alternative<valtype_binocular>(elst.back().val))
                 {
                     insert(op_unary);
                 }
@@ -121,46 +122,39 @@ watch::watch(const std::string &exprstr)
 
             switch (s[i])
             {
-            case '(':
-            {
+            case '(': {
                 ++bcnt;
-                check_expr(!elst.empty() && std::holds_alternative<valtype_constant>(elst.back().val) && std::holds_alternative<valtype_regref>(elst.back().val));
+                check_expr(!elst.empty() && std::holds_alternative<valtype_constant>(elst.back().val) &&
+                           std::holds_alternative<valtype_regref>(elst.back().val));
                 ++i;
                 parse();
                 break;
             }
-            case ')':
-            {
+            case ')': {
                 check_expr(--bcnt < 0);
                 break;
             }
-            case '*':
-            {
+            case '*': {
                 judged_insert(op_deref, op_mult);
                 break;
             }
-            case '+':
-            {
+            case '+': {
                 judged_insert(op_posit, op_add);
                 break;
             }
-            case '-':
-            {
+            case '-': {
                 judged_insert(op_negat, op_sub);
                 break;
             }
-            case '&':
-            {
+            case '&': {
                 judged_insert2(op_band, op_land, '&');
                 break;
             }
-            case '|':
-            {
+            case '|': {
                 judged_insert2(op_bor, op_lor, '|');
                 break;
             }
-            case '!':
-            {
+            case '!': {
                 if (s[i + 1] == '=')
                 {
                     ++i;
@@ -172,23 +166,19 @@ watch::watch(const std::string &exprstr)
                 }
                 break;
             }
-            case '<':
-            {
+            case '<': {
                 binocular_op op = [&]() {
                     switch (s[i + 1])
                     {
-                    case '<':
-                    {
+                    case '<': {
                         ++i;
                         return op_sl;
                     }
-                    case '=':
-                    {
+                    case '=': {
                         ++i;
                         return op_le;
                     }
-                    default:
-                    {
+                    default: {
                         return op_lt;
                     }
                     }
@@ -196,23 +186,19 @@ watch::watch(const std::string &exprstr)
                 insert(op);
                 break;
             }
-            case '>':
-            {
+            case '>': {
                 binocular_op op = [&]() {
                     switch (s[i + 1])
                     {
-                    case '>':
-                    {
+                    case '>': {
                         ++i;
                         return op_sr;
                     }
-                    case '=':
-                    {
+                    case '=': {
                         ++i;
                         return op_ge;
                     }
-                    default:
-                    {
+                    default: {
                         return op_gt;
                     }
                     }
@@ -220,28 +206,23 @@ watch::watch(const std::string &exprstr)
                 insert(op);
                 break;
             }
-            case '/':
-            {
+            case '/': {
                 insert(op_div);
                 break;
             }
-            case '%':
-            {
+            case '%': {
                 insert(op_mod);
                 break;
             }
-            case '^':
-            {
+            case '^': {
                 insert(op_xor);
                 break;
             }
-            case '~':
-            {
+            case '~': {
                 insert(op_flip);
                 break;
             }
-            case '$':
-            {
+            case '$': {
                 ++i;
                 auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
                 try
@@ -256,8 +237,7 @@ watch::watch(const std::string &exprstr)
                 i = j;
                 break;
             }
-            default:
-            {
+            default: {
                 auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
                 try
                 {
@@ -275,49 +255,82 @@ watch::watch(const std::string &exprstr)
         parse();
     }
 
-    std::sort(opvec.begin(), opvec.end(), [](const std::tuple<int32_t, int32_t, std::size_t, std::list<express>::iterator> &left, const std::tuple<int32_t, int32_t, std::size_t, std::list<express>::iterator> &right) {
-        if (std::get<0>(left) != std::get<0>(right))
-        {
-            return std::get<0>(left) > std::get<0>(right);
-        }
-        else if (std::get<1>(left) != std::get<1>(right))
-        {
-            return std::get<1>(left) < std::get<1>(right);
-        }
-        else if (std::get<1>(left) == 1)
-        {
-            return std::get<2>(left) > std::get<2>(right);
-        }
-        else
-        {
-            return std::get<2>(left) < std::get<2>(right);
-        }
-    });
+    std::sort(opvec.begin(), opvec.end(),
+              [](const std::tuple<int32_t, int32_t, std::size_t, std::list<express>::iterator> &left,
+                 const std::tuple<int32_t, int32_t, std::size_t, std::list<express>::iterator> &right) {
+                  if (std::get<0>(left) != std::get<0>(right))
+                  {
+                      return std::get<0>(left) > std::get<0>(right);
+                  }
+                  else if (std::get<1>(left) != std::get<1>(right))
+                  {
+                      return std::get<1>(left) < std::get<1>(right);
+                  }
+                  else if (std::get<1>(left) == 1)
+                  {
+                      return std::get<2>(left) > std::get<2>(right);
+                  }
+                  else
+                  {
+                      return std::get<2>(left) < std::get<2>(right);
+                  }
+              });
 
     for (const auto &tp : opvec)
     {
         auto &curit = std::get<std::list<express>::iterator>(tp);
-        std::visit([&](auto &arg) {
-            using argtype = std::decay_t<decltype(arg)>;
-            if constexpr (std::is_same_v<argtype, valtype_unary>)
-            {
-                auto nit = std::next(curit);
-                std::get<valtype_unary>(curit->val).son = nit;
-                buffer.splice(buffer.end(), elst, nit);
-            }
-            else if constexpr (std::is_same_v<argtype, valtype_binocular>)
-            {
-                auto [lit, rit] = std::make_pair(std::prev(curit), std::next(curit));
-                auto &cur = std::get<valtype_binocular>(curit->val);
-                std::tie(cur.left, cur.right) = std::tie(lit, rit);
-                buffer.splice(buffer.end(), elst, lit);
-                buffer.splice(buffer.end(), elst, rit);
-            }
-            else
-            {
-                // never reach
-            }
-        },
-                   curit->val);
+        std::visit(
+            [&](auto &arg) {
+                using argtype = std::decay_t<decltype(arg)>;
+                if constexpr (std::is_same_v<argtype, valtype_unary>)
+                {
+                    auto nit = std::next(curit);
+                    std::get<valtype_unary>(curit->val).son = nit;
+                    buffer.splice(buffer.end(), elst, nit);
+                }
+                else if constexpr (std::is_same_v<argtype, valtype_binocular>)
+                {
+                    auto [lit, rit] = std::make_pair(std::prev(curit), std::next(curit));
+                    auto &cur = std::get<valtype_binocular>(curit->val);
+                    std::tie(cur.left, cur.right) = std::tie(lit, rit);
+                    buffer.splice(buffer.end(), elst, lit);
+                    buffer.splice(buffer.end(), elst, rit);
+                }
+            },
+            curit->val);
     }
+
+    buffer.splice(buffer.end(), elst, elst.begin());
+}
+
+watch::value_type watch::get_value(const regfile &regs, const ram &mem) const
+{
+    std::function<value_type(std::list<express>::const_iterator curit)> dfs =
+        [&](std::list<express>::const_iterator curit) {
+            value_type r = 0;
+            std::visit(
+                [&](auto &arg) {
+                    using argtype = std::decay_t<decltype(arg)>;
+                    if constexpr (std::is_same_v<argtype, valtype_constant>)
+                    {
+
+                    }
+                    else if constexpr (std::is_same_v<argtype, valtype_regref>)
+                    {
+
+                    }
+                    else if constexpr (std::is_same_v<argtype, valtype_unary>)
+                    {
+
+                    }
+                    else if constexpr (std::is_same_v<argtype, valtype_binocular>)
+                    {
+
+                    }
+                },
+                curit->val);
+            return r;
+        };
+
+    return 0;
 }

@@ -1,19 +1,19 @@
 #include "mem.h"
 
 template <>
-uint32_t ram::mem_read<1>(uint32_t addr)
+uint32_t ram::mem_read<1>(uint32_t addr)const
 {
     return uint32_t(M[addr >> MASK_SIZE][addr & MASK]);
 }
 
 template <>
-uint32_t ram::mem_read<2>(uint32_t addr)
+uint32_t ram::mem_read<2>(uint32_t addr)const
 {
     return uint32_t(*reinterpret_cast<uint16_t *>(&M[addr >> MASK_SIZE][addr & (MASK ^ 0x1U)]));
 }
 
 template <>
-uint32_t ram::mem_read<4>(uint32_t addr)
+uint32_t ram::mem_read<4>(uint32_t addr)const
 {
     return *reinterpret_cast<uint32_t *>(&M[addr >> MASK_SIZE][addr & (MASK ^ 0x3U)]);
 }

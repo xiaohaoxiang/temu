@@ -1,17 +1,15 @@
-#include <iostream>
-#include <memory>
-#include "processor.h"
-#include "mem.h"
 #include "express.h"
-#include <string>
-#include <any>
-#include <vector>
+#include "mem.h"
+#include "processor.h"
+#include <iostream>
+#ifdef __linux__
+#include <readline/history.h>
+#include <readline/readline.h>
+#endif
 using namespace std;
-
-
 
 int main()
 {
-
+    
     return 0;
 }

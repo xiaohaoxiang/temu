@@ -1,8 +1,8 @@
 #ifndef PROCESSOR_H
 #define PROCESSOR_H
 
-#include <cstdint>
 #include "mem.h"
+#include <cstdint>
 
 extern const char *const regname[];
 
@@ -96,18 +96,15 @@ enum : uint32_t
 
 struct regfile
 {
-    union singlereg
-    {
+    union {
         uint32_t _32;
         uint16_t _16;
         uint8_t _8;
-    };
-    singlereg reg[32];
+    } reg[32];
     uint32_t pc, hi, lo;
 
     uint32_t badvaddr;
-    union
-    {
+    union {
         struct
         {
             bool ie : 1;
@@ -119,8 +116,7 @@ struct regfile
         } field;
         uint32_t val;
     } status;
-    union
-    {
+    union {
         struct
         {
             int : 2;
@@ -137,9 +133,8 @@ struct regfile
 
 class processor
 {
-public:
-    union instruction
-    {
+  public:
+    union instruction {
         uint32_t val;
         struct
         {
@@ -164,15 +159,17 @@ public:
         } j;
 
         instruction() = default;
-        instruction(uint32_t val) : val(val) {}
+        instruction(uint32_t val) : val(val)
+        {
+        }
     };
 
-private:
+  private:
     void exec_typei(instruction instr);
     void exec_typer(instruction instr);
     void exec_typej(instruction instr);
 
-#define instr_decl(name) inline void exec_##name(instruction instr)
+#define instr_decl(name) void exec_##name(instruction instr)
 
     // i-type
     instr_decl(beq);
@@ -241,7 +238,7 @@ private:
     void exception(uint32_t exccode);
     void jump(uint32_t target);
 
-public:
+  public:
     processor(ram &mem, bool delayed_branches = true);
     regfile &get_regs();
     const regfile &get_regs() const;
@@ -250,13 +247,13 @@ public:
 
     void exec(instruction instr);
 
-private:
+  private:
     regfile regs;
     ram &mem;
     bool in_delay_slot;
     bool exception_occurred;
 
-public:
+  public:
     const bool delayed_branches;
 };
 

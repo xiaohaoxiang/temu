@@ -1,10 +1,10 @@
 #ifndef EXPRESS_H
 #define EXPRESS_H
 
+#include "processor.h"
+#include <list>
 #include <string>
 #include <variant>
-#include <list>
-#include "processor.h"
 
 enum unary_op
 {
@@ -40,10 +40,10 @@ enum binocular_op
 class watch;
 class express
 {
-public:
+  public:
     using value_type = uint32_t;
 
-private:
+  private:
     friend class watch;
     using valtype_constant = value_type;
     using valtype_regref = regenum;
@@ -51,42 +51,49 @@ private:
     {
         std::list<express>::const_iterator son;
         unary_op op;
-        valtype_unary(unary_op op, std::list<express>::const_iterator son = std::list<express>::const_iterator{nullptr}) : son(son), op(op) {}
+        valtype_unary(unary_op op, std::list<express>::const_iterator son = std::list<express>::const_iterator{nullptr})
+            : son(son), op(op)
+        {
+        }
     };
     struct valtype_binocular
     {
         std::list<express>::const_iterator left;
         std::list<express>::const_iterator right;
         binocular_op op;
-        valtype_binocular(binocular_op op, std::list<express>::const_iterator left = std::list<express>::const_iterator{nullptr},
-                          std::list<express>::const_iterator right = std::list<express>::const_iterator{nullptr}) : left(left), right(right), op(op) {}
+        valtype_binocular(binocular_op op,
+                          std::list<express>::const_iterator left = std::list<express>::const_iterator{nullptr},
+                          std::list<express>::const_iterator right = std::list<express>::const_iterator{nullptr})
+            : left(left), right(right), op(op)
+        {
+        }
     };
     using element_type = std::variant<valtype_constant, valtype_regref, valtype_unary, valtype_binocular>;
 
     express(const element_type &val);
 
-private:
+  private:
     element_type val;
 };
 
 class watch
 {
-public:
+  public:
     using value_type = express::value_type;
 
-private:
+  private:
     using valtype_constant = express::valtype_constant;
     using valtype_regref = express::valtype_regref;
     using valtype_unary = express::valtype_unary;
     using valtype_binocular = express::valtype_binocular;
     using element_type = express::element_type;
 
-public:
+  public:
     watch(const std::string &exprstr);
     value_type get_value(const regfile &regs, const ram &mem) const;
     bool valid();
 
-private:
+  private:
     std::list<express> buffer;
 };
 

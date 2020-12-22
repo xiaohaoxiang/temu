@@ -324,7 +324,14 @@ watch::value_type watch::get_value(const regfile &regs, const ram &mem) const
                         switch (cur.op)
                         {
                         case op_deref: {
-                            return mem.mem_read<4>(operand);
+                            try
+                            {
+                                return mem.mem_read<4>(operand);
+                            }
+                            catch (...)
+                            {
+                                return 0U;
+                            }
                         }
                         case op_posit: {
                             return operand;
@@ -407,5 +414,5 @@ watch::value_type watch::get_value(const regfile &regs, const ram &mem) const
                 curit->val);
         };
 
-    return 0;
+    return dfs(std::prev(buffer.end()));
 }

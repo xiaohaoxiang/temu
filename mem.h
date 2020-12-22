@@ -8,10 +8,11 @@
 class ram
 {
   public:
-    static constexpr uint32_t MASK_SIZE = 12;
-    static constexpr uint32_t MASK = (1U << MASK_SIZE) - 1;
+    static constexpr uint32_t mask_size = 12;
+    static constexpr uint32_t mask = (1U << mask_size) - 1;
+    static constexpr uint32_t block_size = 1UL << mask_size;
 
-    using block_type = std::array<uint8_t, 1UL << MASK_SIZE>;
+    using block_type = std::array<uint8_t, block_size>;
     using map_type = std::unordered_map<uint32_t, block_type>;
 
     template <uint32_t len> uint32_t mem_read(uint32_t addr) const
@@ -25,8 +26,10 @@ class ram
         static_assert(len == 1 || len == 2 || len == 4, "len == 1 || len == 2 || len == 4");
     }
 
+    block_type &get_block(uint32_t addr);
+
   private:
-    map_type M;
+    map_type mmap;
 };
 
 template <> uint32_t ram::mem_read<1>(uint32_t addr) const;

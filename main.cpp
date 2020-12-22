@@ -1,4 +1,5 @@
 #include "debugger.h"
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -12,10 +13,38 @@
 
 #endif // __linux__
 
-int main()
+static const std::string help_info = "help     - print this help info.\n"
+                                     "c        - begin or continue to run.\n"
+                                     "q        - quit temu.\n"
+                                     "si [n]   - run n(default=1) step.\n"
+                                     "info r   - print information of registers.\n"
+                                     "info w   - print information of watch points.\n"
+                                     "p expr   - calculate the result of expression expr\n"
+                                     "x n expr - print n word(s) at the address calculated from the expression expr\n"
+                                     "w expr   - add a watch point of expr\n"
+                                     "d n      - delete the nth watch point\n";
+
+int main(int argc, char const *argv[])
 {
     static const char prompt[] = "(temu)";
-    for (debugger dbg;;)
+    std::string initdata;
+    try
+    {
+        if (argc < 2)
+        {
+            throw;
+        }
+        std::ifstream instrm(argv[1]);
+        initdata.assign(std::istream_iterator<char>{instrm}, std::istream_iterator<char>{});
+    }
+    catch (...)
+    {
+        std::cout << help_info << std::endl;
+        return 0;
+    }
+    debugger dbg(initdata);
+
+    for (;;)
     {
         std::string cmdstr = []() {
 #ifdef __linux__
@@ -49,17 +78,7 @@ int main()
         instrm >> tmp;
         if (tmp == "help")
         {
-            std::cout << "help     - print this help info.\n"
-                         "c        - begin or continue to run.\n"
-                         "q        - quit temu.\n"
-                         "si [n]   - run n(default=1) step.\n"
-                         "info r   - print information of registers.\n"
-                         "info w   - print information of watch points.\n"
-                         "p expr   - calculate the result of expression expr\n"
-                         "x n expr - print n word(s) at the address calculated from the expression expr\n"
-                         "w expr   - add a watch point of expr\n"
-                         "d n      - delete the nth watch point\n"
-                      << std::endl;
+            std::cout << help_info << std::endl;
         }
         else if (tmp == "c")
         {

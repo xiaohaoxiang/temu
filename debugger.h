@@ -15,7 +15,7 @@
 class debugger
 {
   public:
-    debugger();
+    debugger(std::string initdata);
     void add_watch(std::string exprstr);
     void remove_watch(std::size_t n);
     void print_watch(std::ostream &os) const;

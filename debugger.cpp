@@ -1,9 +1,15 @@
 #include "debugger.h"
+#include <algorithm>
 #include <iomanip>
 #include <ostream>
 
-debugger::debugger() : cpu(mem)
+debugger::debugger(std::string initdata) : cpu(mem)
 {
+    for (std::size_t i = 0; i < initdata.size(); i += ram::block_size)
+    {
+        auto &blo = mem.get_block(uint32_t(i));
+        std::copy_n(initdata.begin() + i, ram::block_size, blo.begin());
+    }
 }
 
 void debugger::add_watch(std::string exprstr)

@@ -81,6 +81,10 @@ static const std::unordered_map<std::string, regenum> regmap = []() {
     return r;
 }();
 
+express::express(const element_type &val) : val(val)
+{
+}
+
 watch::watch(const std::string &exprstr)
 {
     const std::string s = std::regex_replace(exprstr, std::regex("\\s"), "") + '\0';

@@ -5,13 +5,14 @@
 #include <sstream>
 #include <string>
 
-#ifdef __linux__
+#if __has_include(<readline/history.h>) && __has_include(<readline/readline.h>)
 
+#define has_readline 1
 #include <memory>
 #include <readline/history.h>
 #include <readline/readline.h>
 
-#endif // __linux__
+#endif
 
 static const std::string help_info = "help     - print this help info.\n"
                                      "c        - begin or continue to run.\n"
@@ -47,7 +48,7 @@ int main(int argc, char const *argv[])
     for (;;)
     {
         std::string cmdstr = []() {
-#ifdef __linux__
+#ifdef has_readline
             std::unique_ptr<char[]> pstr(readline(prompt));
             add_history(pstr.get());
             return std::string(pstr.get());
@@ -56,7 +57,7 @@ int main(int argc, char const *argv[])
             std::string tmp;
             std::getline(std::cin, tmp);
             return tmp;
-#endif // __linux__
+#endif // has_readline
         }();
         [](std::string &s, char ch = ' ') {
             std::string::size_type p = 0;

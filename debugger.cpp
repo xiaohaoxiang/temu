@@ -2,6 +2,10 @@
 #include <iomanip>
 #include <ostream>
 
+debugger::debugger() : cpu(mem)
+{
+}
+
 void debugger::add_watch(std::string exprstr)
 {
     watchlist.emplace_back(exprstr, exprstr, 0U);

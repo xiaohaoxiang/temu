@@ -14,19 +14,19 @@
 #include <unordered_map>
 #include <vector>
 
-#define check_expr(test) \
-    do                   \
-    {                    \
-        if (test)        \
-        {                \
-            return;      \
-        }                \
+#define check_expr(test)                                                                                               \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        if (test)                                                                                                      \
+        {                                                                                                              \
+            return;                                                                                                    \
+        }                                                                                                              \
     } while (0)
 
-#define set_priority(op, pr) \
-    do                       \
-    {                        \
-        r[op] = (pr);        \
+#define set_priority(op, pr)                                                                                           \
+    do                                                                                                                 \
+    {                                                                                                                  \
+        r[op] = (pr);                                                                                                  \
     } while (0)
 
 static const std::array<int32_t, op_lor + 1> opprior = []() {
@@ -122,8 +122,7 @@ watch::watch(const std::string &exprstr)
 
             switch (s[i])
             {
-            case '(':
-            {
+            case '(': {
                 ++bcnt;
                 check_expr(!elst.empty() && std::holds_alternative<valtype_constant>(elst.back().val) &&
                            std::holds_alternative<valtype_regref>(elst.back().val));
@@ -131,38 +130,31 @@ watch::watch(const std::string &exprstr)
                 parse();
                 break;
             }
-            case ')':
-            {
+            case ')': {
                 check_expr(--bcnt < 0);
                 break;
             }
-            case '*':
-            {
+            case '*': {
                 judged_insert(op_deref, op_mult);
                 break;
             }
-            case '+':
-            {
+            case '+': {
                 judged_insert(op_posit, op_add);
                 break;
             }
-            case '-':
-            {
+            case '-': {
                 judged_insert(op_negat, op_sub);
                 break;
             }
-            case '&':
-            {
+            case '&': {
                 judged_insert2(op_band, op_land, '&');
                 break;
             }
-            case '|':
-            {
+            case '|': {
                 judged_insert2(op_bor, op_lor, '|');
                 break;
             }
-            case '!':
-            {
+            case '!': {
                 if (s[i + 1] == '=')
                 {
                     ++i;
@@ -174,23 +166,19 @@ watch::watch(const std::string &exprstr)
                 }
                 break;
             }
-            case '<':
-            {
+            case '<': {
                 binocular_op op = [&]() {
                     switch (s[i + 1])
                     {
-                    case '<':
-                    {
+                    case '<': {
                         ++i;
                         return op_sl;
                     }
-                    case '=':
-                    {
+                    case '=': {
                         ++i;
                         return op_le;
                     }
-                    default:
-                    {
+                    default: {
                         return op_lt;
                     }
                     }
@@ -198,23 +186,19 @@ watch::watch(const std::string &exprstr)
                 insert(op);
                 break;
             }
-            case '>':
-            {
+            case '>': {
                 binocular_op op = [&]() {
                     switch (s[i + 1])
                     {
-                    case '>':
-                    {
+                    case '>': {
                         ++i;
                         return op_sr;
                     }
-                    case '=':
-                    {
+                    case '=': {
                         ++i;
                         return op_ge;
                     }
-                    default:
-                    {
+                    default: {
                         return op_gt;
                     }
                     }
@@ -222,28 +206,23 @@ watch::watch(const std::string &exprstr)
                 insert(op);
                 break;
             }
-            case '/':
-            {
+            case '/': {
                 insert(op_div);
                 break;
             }
-            case '%':
-            {
+            case '%': {
                 insert(op_mod);
                 break;
             }
-            case '^':
-            {
+            case '^': {
                 insert(op_xor);
                 break;
             }
-            case '~':
-            {
+            case '~': {
                 insert(op_flip);
                 break;
             }
-            case '$':
-            {
+            case '$': {
                 ++i;
                 auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
                 try
@@ -258,8 +237,7 @@ watch::watch(const std::string &exprstr)
                 i = j;
                 break;
             }
-            default:
-            {
+            default: {
                 auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
                 try
                 {
@@ -328,126 +306,105 @@ watch::value_type watch::get_value(const regfile &regs, const ram &mem) const
 {
     static const std::function<value_type(std::list<express>::const_iterator curit)> dfs =
         [&](std::list<express>::const_iterator curit) {
-            value_type r = 0;
-            std::visit(
+            return std::visit(
                 [&](auto &arg) {
                     using argtype = std::decay_t<decltype(arg)>;
                     if constexpr (std::is_same_v<argtype, valtype_constant>)
                     {
-                        r = std::get<valtype_constant>(curit->val);
+                        return std::get<valtype_constant>(curit->val);
                     }
                     else if constexpr (std::is_same_v<argtype, valtype_regref>)
                     {
-                        r = regs.reg[std::get<valtype_regref>(curit->val)]._32;
+                        return regs.reg[std::get<valtype_regref>(curit->val)]._32;
                     }
                     else if constexpr (std::is_same_v<argtype, valtype_unary>)
                     {
-                        switch (std::get<valtype_unary>(curit->val).op)
+                        auto &cur = std::get<valtype_unary>(curit->val);
+                        auto operand = dfs(cur.son);
+                        switch (cur.op)
                         {
-                        case op_deref:
-                        {
-                            uint32_t addr=mem.mem_read(1);
-                            break;
+                        case op_deref: {
+                            return mem.mem_read<4>(operand);
                         }
-                        case op_posit:
-                        {
-                            break;
+                        case op_posit: {
+                            return operand;
                         }
-                        case op_negat:
-                        {
-                            break;
+                        case op_negat: {
+                            return -operand;
                         }
-                        case op_lnot:
-                        {
-                            break;
+                        case op_lnot: {
+                            return value_type(!operand);
                         }
-                        case op_flip:
-                        {
-                            break;
+                        case op_flip: {
+                            return ~operand;
                         }
                         }
                     }
                     else if constexpr (std::is_same_v<argtype, valtype_binocular>)
                     {
+                        auto &cur = std::get<valtype_binocular>(curit->val);
+                        auto [operand1, operand2] = std::make_pair(dfs(cur.left), dfs(cur.right));
                         switch (std::get<valtype_binocular>(curit->val).op)
                         {
-                        case op_add:
-                        {
-                            break;
+                        case op_add: {
+                            return operand1 + operand2;
                         }
-                        case op_sub:
-                        {
-                            break;
+                        case op_sub: {
+                            return operand1 - operand2;
                         }
-                        case op_mult:
-                        {
-                            break;
+                        case op_mult: {
+                            return operand1 * operand2;
                         }
-                        case op_div:
-                        {
-                            break;
+                        case op_div: {
+                            return operand1 / operand2;
                         }
-                        case op_mod:
-                        {
-                            break;
+                        case op_mod: {
+                            return operand1 % operand2;
                         }
-                        case op_xor:
-                        {
-                            break;
+                        case op_xor: {
+                            return operand1 ^ operand2;
                         }
-                        case op_band:
-                        {
-                            break;
+                        case op_band: {
+                            return operand1 & operand2;
                         }
-                        case op_bor:
-                        {
-                            break;
+                        case op_bor: {
+                            return operand1 | operand2;
                         }
-                        case op_sl:
-                        {
-                            break;
+                        case op_sl: {
+                            return operand1 << operand2;
                         }
-                        case op_le:
-                        {
-                            break;
+                        case op_le: {
+                            return value_type(operand1 <= operand2);
                         }
-                        case op_lt:
-                        {
-                            break;
+                        case op_lt: {
+                            return value_type(operand1 < operand2);
                         }
-                        case op_sr:
-                        {
-                            break;
+                        case op_sr: {
+                            return operand1 >> operand2;
                         }
-                        case op_ge:
-                        {
-                            break;
+                        case op_ge: {
+                            return value_type(operand1 >= operand2);
                         }
-                        case op_gt:
-                        {
-                            break;
+                        case op_gt: {
+                            return value_type(operand1 > operand2);
                         }
-                        case op_eq:
-                        {
-                            break;
+                        case op_eq: {
+                            return value_type(operand1 == operand2);
                         }
-                        case op_neq:
-                        {
-                            break;
+                        case op_neq: {
+                            return value_type(operand1 != operand2);
                         }
-                        case op_land:
-                        {
-                            break;
+                        case op_land: {
+                            return value_type(operand1 && operand2);
                         }
-                        case op_lor:
-                        {
-                            break;
+                        case op_lor: {
+                            return value_type(operand1 || operand2);
                         }
                         }
                     }
+                    return value_type(0);
                 },
                 curit->val);
-            return r;
         };
 
     return 0;

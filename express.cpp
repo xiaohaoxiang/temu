@@ -76,7 +76,7 @@ static const std::unordered_map<std::string, regenum> regmap = []() {
     for (uint32_t i = 0U; i < 32U; i++)
     {
         r[std::to_string(i)] = regenum(i);
-        r[regname[i]] = regenum(i);
+        r[regname[i] + 1] = regenum(i);
     }
     return r;
 }();

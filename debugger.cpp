@@ -86,6 +86,7 @@ void debugger::run(std::ostream &os, std::size_t n)
                 os << std::dec << i++ << ". " << std::get<std::string>(w) << ' ' << std::get<uint32_t>(w) << " -> "
                    << val << std::endl;
                 std::get<uint32_t>(w) = val;
+                n = 0;
             }
         }
     }

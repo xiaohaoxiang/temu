@@ -5,8 +5,10 @@
             "name": "g++ - 生成和调试活动文件",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/${fileBasenameNoExtension}",
-            "args": [],
+            "program": "${fileDirname}/temu",
+            "args": [
+                ""
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

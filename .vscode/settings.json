@@ -62,6 +62,14 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "any": "cpp",
+        "typeindex": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp",
+        "shared_mutex": "cpp",
+        "forward_list": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }

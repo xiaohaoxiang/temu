@@ -64,11 +64,11 @@ uint32_t debugger::express_clac(std::string exprstr)
 
 void debugger::print_memory(std::ostream &os, std::uint32_t n, std::string exprstr)
 {
-    os << std::left << std::hex << std::setfill('0');
+    os << std::right << std::hex << std::setfill('0');
     uint32_t addr = express_clac(exprstr);
     for (uint32_t i = 0; i < n; i++, addr += 4U)
     {
-        os << std::setw(9) << addr << std::setw(8) << mem.mem_read<4>(addr) << std::endl;
+        os << std::setw(8) << addr << ' ' << std::setw(8) << mem.mem_read<4>(addr) << std::endl;
     }
 }
 

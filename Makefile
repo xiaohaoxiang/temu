@@ -1,9 +1,9 @@
-DEBUG = true
+DEBUG = false
 CPP = g++
 CFLAGS = -std=c++17
 
 ifeq ($(DEBUG), true)
-CFLAGS += -ggdb3 -O0
+CFLAGS += -g3 -O0
 else
 CFLAGS += -O2
 endif

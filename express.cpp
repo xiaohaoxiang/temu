@@ -92,170 +92,172 @@ watch::watch(const std::string &exprstr)
     std::vector<std::tuple<int32_t, int32_t, std::size_t, std::list<express>::iterator>> opvec;
     int32_t bcnt = 0;
 
-    for (std::size_t i = 0; s[i];)
-    {
-        static const std::function<void()> parse = [&]() {
-            static const auto insert = [&](auto op) {
-                auto it = elst.insert(elst.end(), element_type(op));
-                ++i;
-                parse();
-                auto nit = std::next(it);
-                check_expr(nit == elst.end());
-                opvec.push_back(std::make_tuple(bcnt, opprior[op], i, it));
-            };
+    std::size_t i = 0;
+    const std::function<void()> parse = [&]() {
+        const auto insert = [&](auto op) {
+            auto it = elst.insert(elst.end(), element_type(op));
+            ++i;
+            parse();
+            auto nit = std::next(it);
+            check_expr(nit == elst.end());
+            opvec.push_back(std::make_tuple(bcnt, opprior[op], i, it));
+        };
 
-            static const auto judged_insert = [&](unary_op op_unary, binocular_op op_binocular) {
-                if (elst.empty() || std::holds_alternative<valtype_unary>(elst.back().val) ||
-                    std::holds_alternative<valtype_binocular>(elst.back().val))
-                {
-                    insert(op_unary);
-                }
-                else
-                {
-                    insert(op_binocular);
-                }
-            };
-
-            static const auto judged_insert2 = [&](binocular_op op1, binocular_op op2, char ch2) {
-                return insert(s[++i] == ch2 ? op2 : op1);
-            };
-
-            static const auto is_idchar = [](const char ch) {
-                return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
-            };
-
-            switch (s[i])
+        const auto judged_insert = [&](unary_op op_unary, binocular_op op_binocular) {
+            if (elst.empty() || std::holds_alternative<valtype_unary>(elst.back().val) ||
+                std::holds_alternative<valtype_binocular>(elst.back().val))
             {
-            case '(': {
-                ++bcnt;
-                check_expr(!elst.empty() && std::holds_alternative<valtype_constant>(elst.back().val) &&
-                           std::holds_alternative<valtype_regref>(elst.back().val));
-                ++i;
-                parse();
-                break;
+                insert(op_unary);
             }
-            case ')': {
-                check_expr(--bcnt < 0);
-                break;
-            }
-            case '*': {
-                judged_insert(op_deref, op_mult);
-                break;
-            }
-            case '+': {
-                judged_insert(op_posit, op_add);
-                break;
-            }
-            case '-': {
-                judged_insert(op_negat, op_sub);
-                break;
-            }
-            case '&': {
-                judged_insert2(op_band, op_land, '&');
-                break;
-            }
-            case '|': {
-                judged_insert2(op_bor, op_lor, '|');
-                break;
-            }
-            case '!': {
-                if (s[i + 1] == '=')
-                {
-                    ++i;
-                    insert(op_neq);
-                }
-                else
-                {
-                    insert(op_lnot);
-                }
-                break;
-            }
-            case '<': {
-                binocular_op op = [&]() {
-                    switch (s[i + 1])
-                    {
-                    case '<': {
-                        ++i;
-                        return op_sl;
-                    }
-                    case '=': {
-                        ++i;
-                        return op_le;
-                    }
-                    default: {
-                        return op_lt;
-                    }
-                    }
-                }();
-                insert(op);
-                break;
-            }
-            case '>': {
-                binocular_op op = [&]() {
-                    switch (s[i + 1])
-                    {
-                    case '>': {
-                        ++i;
-                        return op_sr;
-                    }
-                    case '=': {
-                        ++i;
-                        return op_ge;
-                    }
-                    default: {
-                        return op_gt;
-                    }
-                    }
-                }();
-                insert(op);
-                break;
-            }
-            case '/': {
-                insert(op_div);
-                break;
-            }
-            case '%': {
-                insert(op_mod);
-                break;
-            }
-            case '^': {
-                insert(op_xor);
-                break;
-            }
-            case '~': {
-                insert(op_flip);
-                break;
-            }
-            case '$': {
-                ++i;
-                auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
-                try
-                {
-                    elst.push_back(express(element_type(regmap.at(s.substr(i, j - i)))));
-                }
-                catch (...)
-                {
-                    return;
-                }
-
-                i = j;
-                break;
-            }
-            default: {
-                auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
-                try
-                {
-                    elst.push_back(express(element_type(uint32_t(std::stoul(s.substr(i, j - i), nullptr, 0)))));
-                }
-                catch (...)
-                {
-                    return;
-                }
-                i = j;
-                break;
-            }
+            else
+            {
+                insert(op_binocular);
             }
         };
+
+        const auto judged_insert2 = [&](binocular_op op1, binocular_op op2, char ch2) {
+            return insert(s[++i] == ch2 ? op2 : op1);
+        };
+
+        const auto is_idchar = [](const char ch) {
+            return ('0' <= ch && ch <= '9') || ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
+        };
+
+        switch (s[i])
+        {
+        case '(': {
+            ++bcnt;
+            check_expr(!elst.empty() && std::holds_alternative<valtype_constant>(elst.back().val) &&
+                       std::holds_alternative<valtype_regref>(elst.back().val));
+            ++i;
+            parse();
+            break;
+        }
+        case ')': {
+            check_expr(--bcnt < 0);
+            ++i;
+            break;
+        }
+        case '*': {
+            judged_insert(op_deref, op_mult);
+            break;
+        }
+        case '+': {
+            judged_insert(op_posit, op_add);
+            break;
+        }
+        case '-': {
+            judged_insert(op_negat, op_sub);
+            break;
+        }
+        case '&': {
+            judged_insert2(op_band, op_land, '&');
+            break;
+        }
+        case '|': {
+            judged_insert2(op_bor, op_lor, '|');
+            break;
+        }
+        case '!': {
+            if (s[i + 1] == '=')
+            {
+                ++i;
+                insert(op_neq);
+            }
+            else
+            {
+                insert(op_lnot);
+            }
+            break;
+        }
+        case '<': {
+            binocular_op op = [&]() {
+                switch (s[i + 1])
+                {
+                case '<': {
+                    ++i;
+                    return op_sl;
+                }
+                case '=': {
+                    ++i;
+                    return op_le;
+                }
+                default: {
+                    return op_lt;
+                }
+                }
+            }();
+            insert(op);
+            break;
+        }
+        case '>': {
+            binocular_op op = [&]() {
+                switch (s[i + 1])
+                {
+                case '>': {
+                    ++i;
+                    return op_sr;
+                }
+                case '=': {
+                    ++i;
+                    return op_ge;
+                }
+                default: {
+                    return op_gt;
+                }
+                }
+            }();
+            insert(op);
+            break;
+        }
+        case '/': {
+            insert(op_div);
+            break;
+        }
+        case '%': {
+            insert(op_mod);
+            break;
+        }
+        case '^': {
+            insert(op_xor);
+            break;
+        }
+        case '~': {
+            insert(op_flip);
+            break;
+        }
+        case '$': {
+            ++i;
+            auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
+            try
+            {
+                elst.push_back(express(element_type(regmap.at(s.substr(i, j - i)))));
+            }
+            catch (...)
+            {
+                return;
+            }
+
+            i = j;
+            break;
+        }
+        default: {
+            auto j = std::find_if_not(s.begin() + i, s.end(), is_idchar) - s.begin();
+            try
+            {
+                elst.push_back(express(element_type(uint32_t(std::stoul(s.substr(i, j - i), nullptr, 0)))));
+            }
+            catch (...)
+            {
+                return;
+            }
+            i = j;
+            break;
+        }
+        }
+    };
+    while (s[i])
+    {
         parse();
     }
 

@@ -280,7 +280,7 @@ watch::watch(const std::string &exprstr)
                   }
               });
 
-    for (const auto &tp : opvec)
+    for (auto &tp : opvec)
     {
         auto &curit = std::get<std::list<express>::iterator>(tp);
         std::visit(
@@ -299,6 +299,14 @@ watch::watch(const std::string &exprstr)
                     std::tie(cur.left, cur.right) = std::tie(lit, rit);
                     buffer.splice(buffer.end(), elst, lit);
                     buffer.splice(buffer.end(), elst, rit);
+                }
+                else if constexpr (std::is_same_v<argtype, valtype_constant>)
+                {
+                    std::abort();
+                }
+                else if constexpr (std::is_same_v<argtype, valtype_unary>)
+                {
+                    std::abort();
                 }
             },
             curit->val);

@@ -6,7 +6,7 @@
 #include <string>
 #include <variant>
 
-enum unary_op
+enum unary_op : int
 {
     op_deref, // *
     op_posit, // +
@@ -15,7 +15,7 @@ enum unary_op
     op_flip   // ~
 };
 
-enum binocular_op
+enum binocular_op : int
 {
     op_add = op_flip + 1, // +
     op_sub,               // -

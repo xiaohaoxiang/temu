@@ -33,10 +33,10 @@ int main(int argc, char const *argv[])
     {
         if (argc < 2)
         {
-            throw;
+            throw 0;
         }
         std::ifstream instrm(argv[1]);
-        initdata.assign(std::istream_iterator<char>{instrm}, std::istream_iterator<char>{});
+        initdata.assign(std::istreambuf_iterator<char>(instrm), std::istreambuf_iterator<char>());
     }
     catch (...)
     {

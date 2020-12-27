@@ -3,7 +3,7 @@ CPP = g++
 CFLAGS = -std=c++17
 
 ifeq ($(DEBUG), true)
-CFLAGS += -g3 -O0
+CFLAGS += -ggdb3 -O0
 else
 CFLAGS += -O2
 endif

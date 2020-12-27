@@ -23,7 +23,7 @@ void debugger::remove_watch(std::size_t n)
     if (n >= watchlist.size())
         return;
     auto it = watchlist.begin();
-    for (std::size_t i = 1; i < n; i++)
+    for (std::size_t i = 0; i < n; i++)
     {
         ++it;
     }
@@ -76,6 +76,7 @@ void debugger::run(std::ostream &os, std::size_t n)
 {
     while (n--)
     {
+        auto addr = mem.mem_read<4>(cpu.get_regs().pc);
         cpu.exec(mem.mem_read<4>(cpu.get_regs().pc));
         std::size_t i = 0;
         for (auto &w : watchlist)
@@ -83,11 +84,12 @@ void debugger::run(std::ostream &os, std::size_t n)
             uint32_t val = std::get<watch>(w).get_value(cpu.get_regs(), mem);
             if (val != std::get<uint32_t>(w))
             {
-                os << std::dec << i++ << ". " << std::get<std::string>(w) << ' ' << std::get<uint32_t>(w) << " -> "
-                   << val << std::endl;
+                os << std::dec << i << ". " << std::get<std::string>(w) << ' ' << std::get<uint32_t>(w) << " -> " << val
+                   << std::endl;
                 std::get<uint32_t>(w) = val;
                 n = 0;
             }
+            i++;
         }
     }
 }

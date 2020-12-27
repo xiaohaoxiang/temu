@@ -15,7 +15,7 @@ class ram
     using block_type = std::array<uint8_t, block_size>;
     using map_type = std::unordered_map<uint32_t, block_type>;
 
-    template <uint32_t len> uint32_t mem_read(uint32_t addr) const
+    template <uint32_t len> uint32_t mem_read(uint32_t addr)
     {
         static_assert(len == 1 || len == 2 || len == 4, "len == 1 || len == 2 || len == 4");
         return 0;
@@ -32,9 +32,9 @@ class ram
     map_type mmap;
 };
 
-template <> uint32_t ram::mem_read<1>(uint32_t addr) const;
-template <> uint32_t ram::mem_read<2>(uint32_t addr) const;
-template <> uint32_t ram::mem_read<4>(uint32_t addr) const;
+template <> uint32_t ram::mem_read<1>(uint32_t addr);
+template <> uint32_t ram::mem_read<2>(uint32_t addr);
+template <> uint32_t ram::mem_read<4>(uint32_t addr);
 
 template <> void ram::mem_write<1>(uint32_t addr, uint32_t data);
 template <> void ram::mem_write<2>(uint32_t addr, uint32_t data);

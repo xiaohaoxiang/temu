@@ -5,19 +5,19 @@ ram::block_type &ram::get_block(uint32_t addr)
     return mmap[addr >> mask_size];
 }
 
-template <> uint32_t ram::mem_read<1>(uint32_t addr) const
+template <> uint32_t ram::mem_read<1>(uint32_t addr) 
 {
-    return uint32_t(mmap.at(addr >> mask_size)[addr & mask]);
+    return uint32_t(mmap[addr >> mask_size][addr & mask]);
 }
 
-template <> uint32_t ram::mem_read<2>(uint32_t addr) const
+template <> uint32_t ram::mem_read<2>(uint32_t addr) 
 {
-    return uint32_t(*reinterpret_cast<const uint16_t *>(&mmap.at(addr >> mask_size)[addr & (mask ^ 0x1U)]));
+    return uint32_t(*reinterpret_cast<const uint16_t *>(&mmap[addr >> mask_size][addr & (mask ^ 0x1U)]));
 }
 
-template <> uint32_t ram::mem_read<4>(uint32_t addr) const
+template <> uint32_t ram::mem_read<4>(uint32_t addr) 
 {
-    return *reinterpret_cast<const uint32_t *>(&mmap.at(addr >> mask_size)[addr & (mask ^ 0x3U)]);
+    return *reinterpret_cast<const uint32_t *>(&mmap[addr >> mask_size][addr & (mask ^ 0x3U)]);
 }
 
 template <> void ram::mem_write<1>(uint32_t addr, uint32_t data)

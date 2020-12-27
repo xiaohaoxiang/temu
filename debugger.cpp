@@ -30,10 +30,10 @@ void debugger::remove_watch(std::size_t n)
     watchlist.erase(it);
 }
 
-void debugger::print_watch(std::ostream &os) const
+void debugger::print_watch(std::ostream &os)
 {
     std::size_t i = 0;
-    for (const auto &w : watchlist)
+    for (auto &w : watchlist)
     {
         os << i++ << ". " << std::get<std::string>(w) << ' ' << std::get<watch>(w).get_value(cpu.get_regs(), mem)
            << std::endl;
@@ -57,12 +57,12 @@ void debugger::print_regs(std::ostream &os) const
     os << std::setw(9) << "epc" << r.epc << std::endl;
 }
 
-uint32_t debugger::express_clac(std::string exprstr) const
+uint32_t debugger::express_clac(std::string exprstr)
 {
     return watch(exprstr).get_value(cpu.get_regs(), mem);
 }
 
-void debugger::print_memory(std::ostream &os, std::uint32_t n, std::string exprstr) const
+void debugger::print_memory(std::ostream &os, std::uint32_t n, std::string exprstr)
 {
     os << std::left << std::hex << std::setfill('0');
     uint32_t addr = express_clac(exprstr);

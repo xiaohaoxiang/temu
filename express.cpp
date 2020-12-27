@@ -306,7 +306,7 @@ watch::watch(const std::string &exprstr)
     buffer.splice(buffer.end(), elst, elst.begin());
 }
 
-watch::value_type watch::get_value(const regfile &regs, const ram &mem) const
+watch::value_type watch::get_value(regfile &regs, ram &mem)
 {
     static const std::function<value_type(std::list<express>::const_iterator curit)> dfs =
         [&](std::list<express>::const_iterator curit) {

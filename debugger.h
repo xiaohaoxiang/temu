@@ -18,10 +18,10 @@ class debugger
     debugger(std::string initdata);
     void add_watch(std::string exprstr);
     void remove_watch(std::size_t n);
-    void print_watch(std::ostream &os) const;
+    void print_watch(std::ostream &os);
     void print_regs(std::ostream &os) const;
-    uint32_t express_clac(std::string exprstr) const;
-    void print_memory(std::ostream &os, std::uint32_t n, std::string exprstr) const;
+    uint32_t express_clac(std::string exprstr);
+    void print_memory(std::ostream &os, std::uint32_t n, std::string exprstr);
     void run(std::ostream &os, std::size_t n = std::numeric_limits<std::size_t>::max());
 
   private:

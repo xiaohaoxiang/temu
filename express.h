@@ -90,7 +90,7 @@ class watch
 
   public:
     watch(const std::string &exprstr);
-    value_type get_value(const regfile &regs, const ram &mem) const;
+    value_type get_value(regfile &regs, ram &mem);
     bool valid();
 
   private:

@@ -96,7 +96,7 @@ watch::watch(const std::string &exprstr)
     const std::function<void()> parse = [&]() {
         const auto insert = [&](auto op) {
             auto it = elst.insert(elst.end(), element_type(op));
-            ++i;
+            i++;
             parse();
             auto nit = std::next(it);
             check_expr(nit == elst.end());
@@ -126,16 +126,16 @@ watch::watch(const std::string &exprstr)
         switch (s[i])
         {
         case '(': {
-            ++bcnt;
+            bcnt++;
             check_expr(!elst.empty() && std::holds_alternative<valtype_constant>(elst.back().val) &&
                        std::holds_alternative<valtype_regref>(elst.back().val));
-            ++i;
+            i++;
             parse();
             break;
         }
         case ')': {
             check_expr(--bcnt < 0);
-            ++i;
+            i++;
             break;
         }
         case '*': {
@@ -208,6 +208,11 @@ watch::watch(const std::string &exprstr)
                 }
             }();
             insert(op);
+            break;
+        }
+        case '=': {
+            i++;
+            insert(op_eq);
             break;
         }
         case '/': {

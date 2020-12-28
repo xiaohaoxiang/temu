@@ -119,7 +119,7 @@ int main(int argc, char const *argv[])
         {
             if (instrm.good())
             {
-                std::cout << dbg.express_clac(instrm.str().substr(instrm.tellg()));
+                std::cout << dbg.express_clac(instrm.str().substr(instrm.tellg())) << std::endl;
             }
         }
         else if (tmp == "x")

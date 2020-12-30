@@ -116,7 +116,15 @@ watch::watch(const std::string &exprstr)
         };
 
         const auto judged_insert2 = [&](binocular_op op1, binocular_op op2, char ch2) {
-            return insert(s[++i] == ch2 ? op2 : op1);
+            if (s[i + 1] == ch2)
+            {
+                i++;
+                insert(op2);
+            }
+            else
+            {
+                insert(op1);
+            }
         };
 
         const auto is_idchar = [](const char ch) {

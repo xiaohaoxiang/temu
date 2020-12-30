@@ -725,6 +725,7 @@ instr_def(mtc0)
 instr_def(eret)
 {
     regs.status.field.exl = false;
+    exception_occurred = false;
     jump(regs.epc);
 }
 

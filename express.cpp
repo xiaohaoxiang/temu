@@ -97,9 +97,6 @@ watch::watch(const std::string &exprstr)
         const auto insert = [&](auto op) {
             auto it = elst.insert(elst.end(), element_type(op));
             i++;
-            parse();
-            auto nit = std::next(it);
-            check_expr(nit == elst.end());
             opvec.push_back(std::make_tuple(bcnt, opprior[op], i, it));
         };
 
@@ -331,7 +328,7 @@ watch::watch(const std::string &exprstr)
 
 watch::value_type watch::get_value(regfile &regs, ram &mem)
 {
-    static const std::function<value_type(std::list<express>::const_iterator curit)> dfs =
+    const std::function<value_type(std::list<express>::const_iterator curit)> dfs =
         [&](std::list<express>::const_iterator curit) {
             return std::visit(
                 [&](auto &arg) {

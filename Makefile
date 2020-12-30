@@ -1,4 +1,4 @@
-DEBUG = false
+DEBUG = true
 CPP = g++
 CFLAGS = -std=c++17 -Wall
 

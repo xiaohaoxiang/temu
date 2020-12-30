@@ -1,6 +1,6 @@
 DEBUG = false
 CPP = g++
-CFLAGS = -std=c++17
+CFLAGS = -std=c++17 -Wall
 
 ifeq ($(DEBUG), true)
 CFLAGS += -g3 -O0

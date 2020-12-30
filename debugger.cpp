@@ -76,7 +76,6 @@ void debugger::run(std::ostream &os, std::size_t n)
 {
     while (n--)
     {
-        auto addr = mem.mem_read<4>(cpu.get_regs().pc);
         cpu.exec(mem.mem_read<4>(cpu.get_regs().pc));
         std::size_t i = 0;
         for (auto &w : watchlist)
